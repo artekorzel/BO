@@ -1,13 +1,13 @@
-package pl.edu.agh.iet.bo;
+package pl.edu.agh.iet.bo.fa;
 
-import static pl.edu.agh.iet.bo.FireflySolution.*;
+import static pl.edu.agh.iet.bo.fa.FireflySolution.*;
 
 public class Firefly implements Comparable<Firefly> {	// i - numer świetlika
 	private double[][] coordinates; 	// coordinates[j][k] = 1 gdy j-te zadanie
 										// jest k-tym el. permutacji
 	private int[] permutation; 		// permutation[j] - aktualna pozycja zadania j w
 										// permutacji
-	private double totalTime; 			// makespan
+	private int totalTime; 			// makespan
 
 	public Firefly() {
 		coordinates = new double[tasks][tasks];
@@ -114,11 +114,11 @@ public class Firefly implements Comparable<Firefly> {	// i - numer świetlika
 		this.coordinates = coordinates;
 	}
 
-	public double getTotalTime() {
+	public int getTotalTime() {
 		return totalTime;
 	}
 
-	public void setTotalTime(double totalTime) {
+	public void setTotalTime(int totalTime) {
 		this.totalTime = totalTime;
 	}
 

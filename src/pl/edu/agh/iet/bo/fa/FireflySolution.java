@@ -1,13 +1,12 @@
-package pl.edu.agh.iet.bo;
+package pl.edu.agh.iet.bo.fa;
 
 import java.util.Arrays;
 
 public class FireflySolution {
-	private static Firefly[] fireflies;	//tablica świetlików
-	private static double bestTime;		//najlepszy dotychczasowy czas
-	private static int[] bestPermutation;	//najlepsza dotychczasowa permutacja
-	private static int numOfBestIteration;//w której iteracji znaleziono najlepsze rozwiązanie
-	
+	public static Firefly[] fireflies;	//tablica świetlików
+	public static int bestTime;			//najlepszy dotychczasowy czas
+	public static int[] bestPermutation;	//najlepsza dotychczasowa permutacja
+	public static int numOfBestIteration;//w której iteracji znaleziono najlepsze rozwiązanie	
 	public static int iterations;			//liczba iteracji
 	public static int tasks;				//liczba zadań
 	public static int machines;			//liczba maszyn
@@ -18,7 +17,8 @@ public class FireflySolution {
 	public static double minimalBeta;		//minimalna atrakcyjność
 	public static double gamma;			//współczynnik absorpcji
 	public static double m;				//wykładnik potęgi we wzorze na nową atrakcyjność
-	public static double[][] times;		//times[i][j] - ile czasu zajmie zadanie j na maszynie i 
+	public static int[][] times;			//times[i][j] - ile czasu zajmie zadanie j na maszynie i 
+	public static int[][] endTimes;
 	public static java.util.Random rand = new java.util.Random();
 		
 	public static void setInitialValues(
@@ -26,7 +26,7 @@ public class FireflySolution {
 			int firefliesNum,
 			int tasks,
 			int machines,
-			double[][] times,
+			int[][] times,
 			double alfa,
 			double betaZero,
 			double minimalBeta,
@@ -44,7 +44,7 @@ public class FireflySolution {
 		FireflySolution.m = m;
 		
 		FireflySolution.fireflies = new Firefly[firefliesNum];
-		bestTime = Double.MAX_VALUE;
+		bestTime = Integer.MAX_VALUE;
 	}
 	
 	public static void updateBest(int iteration) {
@@ -62,10 +62,10 @@ public class FireflySolution {
 	}
 
 	//czas zakończenia wskazanego zadania na wskazanej maszynie
-	public static double endTime(int[] permutation, int machine, int task) {
-		double[][] endTimes = new double[machines][tasks];
-		double theTaskPreviousMachineEndTime = 0;
-		double previousTaskTheMachineEndTime = 0;
+	public static int endTime(int[] permutation, int machine, int task) {
+		endTimes = new int[machines][tasks];
+		int theTaskPreviousMachineEndTime = 0;
+		int previousTaskTheMachineEndTime = 0;
 		
 		if(task != 0) {
 			previousTaskTheMachineEndTime = endTime(permutation, machine, task - 1);
@@ -85,10 +85,10 @@ public class FireflySolution {
 				100, 
 				4, 
 				3, 
-				new double[][] {
-						{5.0, 7.0, 3.0, 1.0},
-						{2.0, 4.0, 5.0, 8.0},
-						{6.0, 2.0, 4.0, 3.0}
+				new int[][] {
+						{5, 7, 3, 1},
+						{2, 4, 5, 8},
+						{6, 2, 4, 3}
 				}, 
 				2, 
 				2, 
