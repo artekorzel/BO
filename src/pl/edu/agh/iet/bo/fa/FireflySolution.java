@@ -44,6 +44,7 @@ public class FireflySolution {
 		FireflySolution.m = m;
 		
 		FireflySolution.fireflies = new Firefly[firefliesNum];
+		endTimes = new int[machines][tasks];
 		bestTime = Integer.MAX_VALUE;
 	}
 	
@@ -63,7 +64,6 @@ public class FireflySolution {
 
 	//czas zakończenia wskazanego zadania na wskazanej maszynie
 	public static int endTime(int[] permutation, int machine, int task) {
-		endTimes = new int[machines][tasks];
 		int theTaskPreviousMachineEndTime = 0;
 		int previousTaskTheMachineEndTime = 0;
 		
