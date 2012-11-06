@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Paint;
 import java.awt.geom.Rectangle2D;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -12,10 +13,16 @@ import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.CategoryAxis;
+import org.jfree.chart.axis.DateAxis;
 import org.jfree.chart.axis.ValueAxis;
+import org.jfree.chart.labels.CategoryItemLabelGenerator;
+import org.jfree.chart.labels.IntervalCategoryItemLabelGenerator;
+import org.jfree.chart.labels.ItemLabelAnchor;
+import org.jfree.chart.labels.ItemLabelPosition;
 import org.jfree.chart.plot.CategoryPlot;
 import org.jfree.chart.renderer.category.CategoryItemRendererState;
 import org.jfree.chart.renderer.category.GanttRenderer;
+import org.jfree.data.category.CategoryDataset;
 import org.jfree.data.gantt.GanttCategoryDataset;
 import org.jfree.data.gantt.Task;
 import org.jfree.data.gantt.TaskSeries;
@@ -24,12 +31,14 @@ import org.jfree.data.time.SimpleTimePeriod;
 import org.jfree.ui.ApplicationFrame;
 import org.jfree.ui.RectangleEdge;
 import org.jfree.ui.RefineryUtilities;
+import org.jfree.ui.TextAnchor;
 
 import pl.edu.agh.iet.bo.fa.FireflySolution;
 
 public class GanttCharts extends ApplicationFrame {
 
 	private static final long serialVersionUID = 1L;
+	private static int counter;
 
 	public GanttCharts(String title, int[] permutation, int[][] times,
 			int[][] endTimes) {
@@ -60,7 +69,7 @@ public class GanttCharts extends ApplicationFrame {
 			colors.add(Color.getHSBColor(i / (float) tasks, 1, 1));
 		}
 
-		plot.setRenderer(new GanttRenderer() {
+		GanttRenderer gr = new GanttRenderer() {
 			private static final long serialVersionUID = 1L;
 
 			private int index = 0;
@@ -93,18 +102,45 @@ public class GanttCharts extends ApplicationFrame {
 					double rectStart = calculateBarW0(plot,
 							plot.getOrientation(), dataArea, domainAxis, state,
 							row, column) + width / 2;
-					double height = Math.abs(translatedEnd	- translatedStart);
+					double height = Math.abs(translatedEnd - translatedStart);
 
 					Rectangle2D bar = new Rectangle2D.Double(Math.min(
-							translatedStart, translatedEnd), rectStart,
-							height, width);
+							translatedStart, translatedEnd), rectStart, height,
+							width);
 
 					Paint color = getItemPaint(row, column);
 					g2.setPaint(color);
 					g2.fill(bar);
+
+					CategoryItemLabelGenerator generator = getItemLabelGenerator(
+							row, column);
+					if (generator != null && isItemLabelVisible(row, column)) {
+						drawItemLabel(g2, dataset, row, column, plot,
+								generator, bar, false);
+					}
 				}
 			}
+		};
+
+		plot.setRenderer(gr);
+
+		gr.setBaseItemLabelGenerator(new IntervalCategoryItemLabelGenerator() {
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public String generateLabel(CategoryDataset dataset, int row,
+					int column) {
+				return FireflySolution.bestPermutation[(counter++) % tasks]
+						+ "";
+			}
 		});
+
+		gr.setBaseItemLabelsVisible(true);
+		gr.setBasePositiveItemLabelPosition(new ItemLabelPosition(
+				ItemLabelAnchor.CENTER, TextAnchor.CENTER));
+
+		((DateAxis) (plot.getRangeAxis()))
+				.setDateFormatOverride(new SimpleDateFormat("ssSSS"));
 
 		return chart;
 
@@ -114,7 +150,7 @@ public class GanttCharts extends ApplicationFrame {
 			int[][] times, int[][] endTimes) {
 		TaskSeriesCollection dataset = new TaskSeriesCollection();
 		TaskSeries tasks = new TaskSeries("Tasks");
-		;
+
 		Task machine, task;
 
 		for (int j = 0, m = endTimes.length; j < m; ++j) {
@@ -123,7 +159,7 @@ public class GanttCharts extends ApplicationFrame {
 					endTimes[j][order.length - 1])));
 
 			for (int i = 0, n = order.length; i < n; ++i) {
-				task = new Task("Machine " + (j + 1), new SimpleTimePeriod(
+				task = new Task("Task " + (j + 1), new SimpleTimePeriod(
 						new Date(endTimes[j][i] - times[j][order[i]]),
 						new Date(endTimes[j][i])));
 
@@ -138,16 +174,16 @@ public class GanttCharts extends ApplicationFrame {
 	}
 
 	public static void main(String[] args) {
-		long time = System.currentTimeMillis();
+		long time = System.nanoTime();
 		FireflySolution.main(new String[0]);
-		time = System.currentTimeMillis() - time;
+		time = System.nanoTime() - time;
 
 		FireflySolution.endTime(FireflySolution.bestPermutation,
 				FireflySolution.machines - 1, FireflySolution.tasks - 1);
 
-		GanttCharts chart = new GanttCharts("GanttChart: " + (time / 1e6)
-				+ " s", FireflySolution.bestPermutation, FireflySolution.times,
-				FireflySolution.endTimes);
+		GanttCharts chart = new GanttCharts(String.format("GanttChart: %.3f s",
+				time / 1e9), FireflySolution.bestPermutation,
+				FireflySolution.times, FireflySolution.endTimes);
 		RefineryUtilities.centerFrameOnScreen(chart);
 
 	}
