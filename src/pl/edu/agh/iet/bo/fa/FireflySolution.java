@@ -2,9 +2,6 @@ package pl.edu.agh.iet.bo.fa;
 
 import java.util.Arrays;
 
-import pl.edu.agh.iet.bo.parser.ParsedTable;
-import pl.edu.agh.iet.bo.parser.TestParser;
-
 public class FireflySolution {
 	public static Firefly[] fireflies; // tablica świetlików
 	public static int bestTime; // najlepszy dotychczasowy czas
@@ -83,13 +80,7 @@ public class FireflySolution {
 		return endTimes[machines - 1][tasks - 1];
 	}
 
-	public static void main(String[] args) {
-		TestParser parser = new TestParser();
-		parser.parse("flowshop_test_data.txt");
-		ParsedTable pt = parser.getParsed().get(30);
-		setInitialValues(10, 100, pt.getTasksCount(), pt.getMachinesCount(),
-				pt.getTable(), 2, 2, 1, 1, 0.5);
-
+	public static void doWork() {
 		int i, j;
 		for (j = 0; j < firefliesNum; ++j) {
 			fireflies[j] = new Firefly();

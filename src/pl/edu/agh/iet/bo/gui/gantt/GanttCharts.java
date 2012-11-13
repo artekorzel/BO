@@ -34,6 +34,9 @@ import org.jfree.ui.RefineryUtilities;
 import org.jfree.ui.TextAnchor;
 
 import pl.edu.agh.iet.bo.fa.FireflySolution;
+import pl.edu.agh.iet.bo.parser.ParsedTable;
+import pl.edu.agh.iet.bo.parser.TaillardParser;
+import pl.edu.agh.iet.bo.parser.TestParser;
 
 public class GanttCharts extends ApplicationFrame {
 
@@ -174,8 +177,16 @@ public class GanttCharts extends ApplicationFrame {
 	}
 
 	public static void main(String[] args) {
+//		TestParser parser = new TestParser();
+//		parser.parse("flowshop_test_data.txt");
+		TaillardParser parser = new TaillardParser();
+		parser.parse("taillard/tai20_10.txt");
+		ParsedTable pt = parser.getParsed().get(1);
+		FireflySolution.setInitialValues(100, 100, pt.getTasksCount(), pt.getMachinesCount(),
+				pt.getTable(), 2, 2, 1, 1, 0.5);
+		
 		long time = System.nanoTime();
-		FireflySolution.main(new String[0]);
+		FireflySolution.doWork();
 		time = System.nanoTime() - time;
 
 		GanttCharts chart = new GanttCharts(String.format(
