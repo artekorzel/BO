@@ -2,36 +2,34 @@ package pl.edu.agh.iet.bo.fa;
 
 import java.util.Arrays;
 
+import pl.edu.agh.iet.bo.parser.ParsedTable;
+import pl.edu.agh.iet.bo.parser.TestParser;
+
 public class FireflySolution {
-	public static Firefly[] fireflies;	//tablica świetlików
-	public static int bestTime;			//najlepszy dotychczasowy czas
-	public static int[] bestPermutation;	//najlepsza dotychczasowa permutacja
-	public static int numOfBestIteration;//w której iteracji znaleziono najlepsze rozwiązanie	
-	public static int iterations;			//liczba iteracji
-	public static int tasks;				//liczba zadań
-	public static int machines;			//liczba maszyn
-	public static int firefliesNum;		//liczba świetlików
-	public static double alfa;			//współczynnik randomizacji
-	public static double alfaMinimizer;	//współczynnik zmiany współczynnika randomizacji
-	public static double betaZero;		//początkowa atrakcyjność
-	public static double minimalBeta;		//minimalna atrakcyjność
-	public static double gamma;			//współczynnik absorpcji
-	public static double m;				//wykładnik potęgi we wzorze na nową atrakcyjność
-	public static int[][] times;			//times[i][j] - ile czasu zajmie zadanie j na maszynie i 
+	public static Firefly[] fireflies; // tablica świetlików
+	public static int bestTime; // najlepszy dotychczasowy czas
+	public static int[] bestPermutation; // najlepsza dotychczasowa permutacja
+	public static int numOfBestIteration;// w której iteracji znaleziono
+											// najlepsze rozwiązanie
+	public static int iterations; // liczba iteracji
+	public static int tasks; // liczba zadań
+	public static int machines; // liczba maszyn
+	public static int firefliesNum; // liczba świetlików
+	public static double alfa; // współczynnik randomizacji
+	public static double alfaMinimizer; // współczynnik zmiany współczynnika
+										// randomizacji
+	public static double betaZero; // początkowa atrakcyjność
+	public static double minimalBeta; // minimalna atrakcyjność
+	public static double gamma; // współczynnik absorpcji
+	public static double m; // wykładnik potęgi we wzorze na nową atrakcyjność
+	public static int[][] times; // times[i][j] - ile czasu zajmie zadanie j na
+									// maszynie i
 	public static int[][] endTimes;
 	public static java.util.Random rand = new java.util.Random();
-		
-	public static void setInitialValues(
-			int iterations,
-			int firefliesNum,
-			int tasks,
-			int machines,
-			int[][] times,
-			double alfa,
-			double betaZero,
-			double minimalBeta,
-			double gamma,
-			double m) {
+
+	public static void setInitialValues(int iterations, int firefliesNum,
+			int tasks, int machines, int[][] times, double alfa,
+			double betaZero, double minimalBeta, double gamma, double m) {
 		FireflySolution.iterations = iterations;
 		FireflySolution.firefliesNum = firefliesNum;
 		FireflySolution.tasks = tasks;
@@ -42,92 +40,84 @@ public class FireflySolution {
 		FireflySolution.minimalBeta = minimalBeta;
 		FireflySolution.gamma = gamma;
 		FireflySolution.m = m;
-		
+
 		FireflySolution.fireflies = new Firefly[firefliesNum];
 		endTimes = new int[machines][tasks];
 		bestTime = Integer.MAX_VALUE;
 	}
-	
+
 	public static void updateBest(int iteration) {
-		for(Firefly firefly : fireflies) {
-			if(firefly.getTotalTime() < bestTime) {
+		for (Firefly firefly : fireflies) {
+			if (firefly.getTotalTime() < bestTime) {
 				bestTime = firefly.getTotalTime();
-				bestPermutation = Arrays.copyOf(firefly.getPermutation(), tasks);
+				bestPermutation = Arrays
+						.copyOf(firefly.getPermutation(), tasks);
 				numOfBestIteration = iteration;
 			}
 		}
 	}
-	
+
 	public static void changeAlfa(int iterationNum) {
-		alfa *= (1.0 - alfaMinimizer * (1.0 - Math.pow(1.0 / 9000.0, 1.0 / iterationNum)));
+		alfa *= (1.0 - alfaMinimizer
+				* (1.0 - Math.pow(1.0 / 9000.0, 1.0 / iterationNum)));
 	}
 
-	//czas zakończenia wskazanego zadania na wskazanej maszynie
-	public static int endTime(int[] permutation, int machine, int task) {
-		int theTaskPreviousMachineEndTime = 0;
-		int previousTaskTheMachineEndTime = 0;
-		
-		if(task != 0) {
-			previousTaskTheMachineEndTime = endTime(permutation, machine, task - 1);
-		}
-
-		if(machine != 0) {
-			theTaskPreviousMachineEndTime = endTime(permutation, machine - 1, task);
-		}
-		
-		return endTimes[machine][task] = Math.max(previousTaskTheMachineEndTime, 
-				theTaskPreviousMachineEndTime) + times[machine][permutation[task]];
-	}
-	
-	private static void test1() {
-		setInitialValues(
-				100, 
-				100, 
-				4, 
-				3, 
-				new int[][] {
-						{5, 7, 3, 1},
-						{2, 4, 5, 8},
-						{6, 2, 4, 3}
-				}, 
-				2, 
-				2, 
-				1, 
-				1, 
-				0.5
-		);
-	}
-	
-	public static void main(String[] args) {
-		//TODO wczytywanie pobieranie danych inicjujących skądś?
-		test1();	//mały test żeby sprawdzić czy działa, minimum to 24 dla dwóch sekwencji: 3021. 2031
-		
+	// czas zakończenia ostatniego zadania na ostatniej maszynie
+	// - czas zakonczenia produkcji
+	public static int endTime(int[] permutation) {
 		int i, j;
-		for(i = 0; i < iterations; ++i) {
-			for(j = 0; j < firefliesNum; ++j) {
-				fireflies[j] = new Firefly();
+		endTimes[0][0] = times[0][permutation[0]];
+		for (i = 1; i < machines; ++i) {
+			endTimes[i][0] = endTimes[i - 1][0] + times[i][permutation[0]];
+		}
+
+		for (j = 1; j < tasks; ++j) {
+			endTimes[0][j] = endTimes[0][j - 1] + times[0][permutation[j]];
+
+			for (i = 1; i < machines; ++i) {
+				endTimes[i][j] = Math.max(endTimes[i][j - 1],
+						endTimes[i - 1][j]) + times[i][permutation[j]];
 			}
-			
+		}
+
+		return endTimes[machines - 1][tasks - 1];
+	}
+
+	public static void main(String[] args) {
+		TestParser parser = new TestParser();
+		parser.parse("flowshop_test_data.txt");
+		ParsedTable pt = parser.getParsed().get(30);
+		setInitialValues(10, 100, pt.getTasksCount(), pt.getMachinesCount(),
+				pt.getTable(), 2, 2, 1, 1, 0.5);
+
+		int i, j;
+		for (j = 0; j < firefliesNum; ++j) {
+			fireflies[j] = new Firefly();
+		}
+
+		for (i = 0; i < iterations; ++i) {
 			Arrays.sort(fireflies);
-			
-			for(Firefly fireflyFirst : fireflies) {
-				for(Firefly fireflySecond : fireflies) {
-					if(fireflyFirst.compareTo(fireflySecond) < 0) {	//mniej atrakcyjny -> większy czas
+
+			for (Firefly fireflyFirst : fireflies) {
+				for (Firefly fireflySecond : fireflies) {
+					if (fireflyFirst.compareTo(fireflySecond) < 0) { 
+						// mniej atrakcyjny -> większy czas
 						fireflyFirst.move(fireflySecond);
 					}
 				}
 			}
-			
+
 			fireflies[firefliesNum - 1].moveRandomly();
-			
-			for(Firefly firefly : fireflies) {
+
+			for (Firefly firefly : fireflies) {
 				firefly.evalNewPermutation();
 				firefly.updateTotalTime();
 			}
-			
+
 			updateBest(i);
 		}
-		
+		endTime(bestPermutation);
+
 		System.out.println(Arrays.toString(bestPermutation));
 		System.out.println(bestTime);
 		System.out.println(numOfBestIteration);

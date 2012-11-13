@@ -2,12 +2,12 @@ package pl.edu.agh.iet.bo.fa;
 
 import static pl.edu.agh.iet.bo.fa.FireflySolution.*;
 
-public class Firefly implements Comparable<Firefly> {	// i - numer świetlika
-	private double[][] coordinates; 	// coordinates[j][k] = 1 gdy j-te zadanie
-										// jest k-tym el. permutacji
-	private int[] permutation; 		// permutation[j] - aktualna pozycja zadania j w
-										// permutacji
-	private int totalTime; 			// makespan
+public class Firefly implements Comparable<Firefly> { // i - numer świetlika
+	private double[][] coordinates; // coordinates[j][k] = 1 gdy j-te zadanie
+									// jest k-tym el. permutacji
+	private int[] permutation; // permutation[j] - aktualna pozycja zadania j w
+								// permutacji
+	private int totalTime; // makespan
 
 	public Firefly() {
 		coordinates = new double[tasks][tasks];
@@ -27,7 +27,7 @@ public class Firefly implements Comparable<Firefly> {	// i - numer świetlika
 			permutation[j] = k;
 			coordinates[j][k] = 1.0;
 		}
-		
+
 		updateTotalTime();
 	}
 
@@ -47,9 +47,10 @@ public class Firefly implements Comparable<Firefly> {	// i - numer świetlika
 
 		for (j = 0; j < tasks; ++j) {
 			for (k = 0; k < tasks; ++k) {
-				coordinates[j][k] += distance + alfa * (rand.nextDouble() - 0.5);
-				
-				if(brighter.permutation[k] == j) {
+				coordinates[j][k] += distance + alfa
+						* (rand.nextDouble() - 0.5);
+
+				if (brighter.permutation[k] == j) {
 					coordinates[j][k] += distance;
 				}
 			}
@@ -73,29 +74,28 @@ public class Firefly implements Comparable<Firefly> {	// i - numer świetlika
 		}
 
 		boolean[] notAssigned = new boolean[tasks];
-		for(j = 0; j < tasks; ++j) {
+		for (j = 0; j < tasks; ++j) {
 			notAssigned[j] = true;
 		}
-		
+
 		int maxPossibilityIndex = 0;
 		double maxPossibility;
 		for (j = 0; j < tasks; ++j) {
 			maxPossibility = -1.0;
 			for (k = 0; k < tasks; ++k) {
-				if (coordinates[j][k] > maxPossibility
-						&& notAssigned[k]) {
+				if (coordinates[j][k] > maxPossibility && notAssigned[k]) {
 					maxPossibilityIndex = k;
 					maxPossibility = coordinates[j][k];
 				}
 			}
-			
+
 			permutation[maxPossibilityIndex] = j;
 			notAssigned[maxPossibilityIndex] = false;
 		}
 	}
-	
+
 	public void updateTotalTime() {
-		totalTime = endTime(permutation, machines - 1, tasks - 1);
+		totalTime = endTime(permutation);
 	}
 
 	public int[] getPermutation() {
@@ -123,11 +123,10 @@ public class Firefly implements Comparable<Firefly> {	// i - numer świetlika
 	}
 
 	@Override
-	public int compareTo(Firefly o) {	//porównuje totalTime'y
-		if(this.totalTime > o.totalTime) {
+	public int compareTo(Firefly o) { // porównuje totalTime'y
+		if (this.totalTime > o.totalTime) {
 			return -1;
-		}
-		else if(this.totalTime < o.totalTime) {
+		} else if (this.totalTime < o.totalTime) {
 			return 1;
 		}
 		return 0;

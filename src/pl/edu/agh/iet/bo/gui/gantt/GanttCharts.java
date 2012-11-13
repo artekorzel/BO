@@ -1,4 +1,4 @@
-package pl.edu.agh.iet.gui.gantt;
+package pl.edu.agh.iet.bo.gui.gantt;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
@@ -178,11 +178,9 @@ public class GanttCharts extends ApplicationFrame {
 		FireflySolution.main(new String[0]);
 		time = System.nanoTime() - time;
 
-		FireflySolution.endTime(FireflySolution.bestPermutation,
-				FireflySolution.machines - 1, FireflySolution.tasks - 1);
-
-		GanttCharts chart = new GanttCharts(String.format("GanttChart: %.3f s",
-				time / 1e9), FireflySolution.bestPermutation,
+		GanttCharts chart = new GanttCharts(String.format(
+				"GanttChart\nWorking time: %.3f s\nSolution: %d", time / 1e9,
+				FireflySolution.bestTime), FireflySolution.bestPermutation,
 				FireflySolution.times, FireflySolution.endTimes);
 		RefineryUtilities.centerFrameOnScreen(chart);
 
