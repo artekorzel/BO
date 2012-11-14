@@ -108,9 +108,5 @@ public class FireflySolution {
 			updateBest(i);
 		}
 		endTime(bestPermutation);
-
-		System.out.println(Arrays.toString(bestPermutation));
-		System.out.println(bestTime);
-		System.out.println(numOfBestIteration);
 	}
 }

@@ -36,7 +36,6 @@ import org.jfree.ui.TextAnchor;
 import pl.edu.agh.iet.bo.fa.FireflySolution;
 import pl.edu.agh.iet.bo.parser.ParsedTable;
 import pl.edu.agh.iet.bo.parser.TaillardParser;
-import pl.edu.agh.iet.bo.parser.TestParser;
 
 public class GanttCharts extends ApplicationFrame {
 
@@ -133,7 +132,7 @@ public class GanttCharts extends ApplicationFrame {
 			@Override
 			public String generateLabel(CategoryDataset dataset, int row,
 					int column) {
-				return FireflySolution.bestPermutation[(counter++) % tasks]
+				return (1 + FireflySolution.bestPermutation[(counter++) % tasks])
 						+ "";
 			}
 		});
@@ -157,14 +156,14 @@ public class GanttCharts extends ApplicationFrame {
 		Task machine, task;
 
 		for (int j = 0, m = endTimes.length; j < m; ++j) {
-			machine = new Task("Machine " + j, new SimpleTimePeriod(new Date(
+			machine = new Task("" + (j + 1), new SimpleTimePeriod(new Date(
 					endTimes[j][0] - times[j][order[0]]), new Date(
 					endTimes[j][order.length - 1])));
 
 			for (int i = 0, n = order.length; i < n; ++i) {
-				task = new Task("Task " + (j + 1), new SimpleTimePeriod(
-						new Date(endTimes[j][i] - times[j][order[i]]),
-						new Date(endTimes[j][i])));
+				task = new Task("" + (i + 1), new SimpleTimePeriod(new Date(
+						endTimes[j][i] - times[j][order[i]]), new Date(
+						endTimes[j][i])));
 
 				machine.addSubtask(task);
 			}
@@ -177,22 +176,37 @@ public class GanttCharts extends ApplicationFrame {
 	}
 
 	public static void main(String[] args) {
-//		TestParser parser = new TestParser();
-//		parser.parse("flowshop_test_data.txt");
 		TaillardParser parser = new TaillardParser();
-		parser.parse("taillard/tai20_10.txt");
-		ParsedTable pt = parser.getParsed().get(1);
-		FireflySolution.setInitialValues(100, 100, pt.getTasksCount(), pt.getMachinesCount(),
-				pt.getTable(), 2, 2, 1, 1, 0.5);
-		
+		ParsedTable pt = parser.getTable(5, 5); //TODO napisac rozsadne jednoznaczne wybieranie
+		if (pt == null) {
+			throw new RuntimeException("Unknown table");
+		}
+
+		FireflySolution.setInitialValues(100, 100, pt.getTasksCount(),
+				pt.getMachinesCount(), pt.getTable(), 2, 2, 1, 1, 0.5);
+
 		long time = System.nanoTime();
 		FireflySolution.doWork();
 		time = System.nanoTime() - time;
 
+		int i;
+		System.out.println("Best permutation: ");
+		for (i = 0; i < FireflySolution.tasks - 1; ++i) {
+			System.out.print((FireflySolution.bestPermutation[i] + 1) + ", ");
+		}
+		System.out.println(FireflySolution.bestPermutation[i]);
+
+		System.out.println("Solution of best permutation: "
+				+ FireflySolution.bestTime);
+		System.out.println("Number of best iteration: "
+				+ FireflySolution.numOfBestIteration);
+
 		GanttCharts chart = new GanttCharts(String.format(
-				"GanttChart\nWorking time: %.3f s\nSolution: %d", time / 1e9,
-				FireflySolution.bestTime), FireflySolution.bestPermutation,
-				FireflySolution.times, FireflySolution.endTimes);
+					"%s(%d - %d)\nWorking time: %.3f s\nSolution: %d",
+					pt.getTitle(), pt.getLowerBound(), pt.getUpperBound(),
+					time / 1e9, FireflySolution.bestTime),
+				FireflySolution.bestPermutation, FireflySolution.times,
+				FireflySolution.endTimes);
 		RefineryUtilities.centerFrameOnScreen(chart);
 
 	}
